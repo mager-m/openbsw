@@ -66,22 +66,52 @@ docker> cmake --preset posix
 docker> cmake --build --preset posix
 ```
 
+### Building for Arduino Nano ESP32
+
+Requires [ESP-IDF v5.5.x](https://docs.espressif.com/projects/esp-idf/en/v5.5.4/esp32s3/get-started/index.html)
+with `IDF_PATH` set and ESP-IDF tools (`cmake`, `ninja`, `xtensa-esp32s3-elf-gcc`) in PATH.
+
+The ESP32 build has two phases — OpenBSW compilation, then linking with ESP-IDF runtime:
+
+```bash
+# Phase 1: Compile OpenBSW (link failure at the end is expected)
+cmake --preset esp32-freertos
+cmake --build build/esp32-freertos --config RelWithDebInfo
+
+# Archive application objects
+xtensa-esp32s3-elf-ar rcs build/esp32-freertos/libappReferenceApp.a \
+  build/esp32-freertos/executables/referenceApp/application/CMakeFiles/app.referenceApp.dir/RelWithDebInfo/src/**/*.obj
+
+# Phase 2: Build ESP-IDF wrapper (produces flashable binary)
+cd executables/referenceApp/platforms/esp32/idf_project
+cmake -G Ninja -S . -B build -DIDF_TARGET=esp32s3 \
+  -DSDKCONFIG_DEFAULTS=sdkconfig.defaults -DPYTHON_DEPS_CHECKED=1 -DCCACHE_ENABLE=0
+cmake --build build
+
+# Flash (hold B1 button, plug USB, release B1 to enter bootloader)
+idf.py -p <PORT> flash
+idf.py -p <PORT> monitor    # press Enter, type 'help'
+```
+
+See [ESP32 platform documentation](doc/dev/platforms/esp32/index.rst) for full details,
+pin configuration, and VS Code task setup.
+
 ## Feature Overview
 
 ### Implemented Features
 
-| Feature | Description | POSIX Support | S32K148 Support | New? |
-| --- | --- | --- | --- | --- |
-| Modular design | Based on each project's needs, required software modules can easily be included or excluded. | Yes | Yes | |
-| Application Lifecycle Management | The order in which Applications/Features are brought up/down is easily organised. | Yes | Yes | |
-| Console | A console is provided for diagnostic and development purposes. | In a terminal interface | Via UART | |
-| Commands | Commands can easily be added to the console to aid development, test and debugging. | Yes | Yes | |
-| Logging | Diagnostic logging is implemented per software component. | Yes | Yes | |
-| CAN | Support for CAN bus communication | If ``SocketCAN`` is supported | Yes | Since Release 0.1 |
-| Sensors and actuators integration | ADC, PWM & GPIO | | Yes | |
-| UDS, DoCAN | Diagnostics over CAN | If ``SocketCAN`` is supported | Yes | Since Release 0.1 |
-| Ethernet | Basic TCP and UDP support | Yes | Yes | On current `main` |
-| Storage | Persistent data storage on EEPROM and Flash | Yes | Yes | On current `main` |
+| Feature | Description | POSIX Support | S32K148 Support | ESP32 Support | New? |
+| --- | --- | --- | --- | --- | --- |
+| Modular design | Based on each project's needs, required software modules can easily be included or excluded. | Yes | Yes | Yes | |
+| Application Lifecycle Management | The order in which Applications/Features are brought up/down is easily organised. | Yes | Yes | Yes | |
+| Console | A console is provided for diagnostic and development purposes. | In a terminal interface | Via UART | Via USB Serial/JTAG | |
+| Commands | Commands can easily be added to the console to aid development, test and debugging. | Yes | Yes | Yes | |
+| Logging | Diagnostic logging is implemented per software component. | Yes | Yes | Yes | |
+| CAN | Support for CAN bus communication | If ``SocketCAN`` is supported | Yes | Via TWAI (ext. transceiver) | |
+| Sensors and actuators integration | ADC, PWM & GPIO | | Yes | Yes (ADC, LEDC, GPIO) | |
+| UDS, DoCAN | Diagnostics over CAN | If ``SocketCAN`` is supported | Yes | Yes | |
+| Ethernet | Basic TCP and UDP support | Yes | Yes | No (no PHY) | |
+| Storage | Persistent data storage on EEPROM and Flash | Yes | Yes | Yes (NVS-based) | |
 
 ## Roadmap
 

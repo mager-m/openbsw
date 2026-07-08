@@ -6,6 +6,9 @@ add_subdirectory(bspUart)
 add_subdirectory(bspSystemTime)
 add_subdirectory(socketCanTransceiver)
 add_subdirectory(tapEthernetDriver)
+add_subdirectory(bspSysfsPwm)
+add_subdirectory(bspSysfsGpio)
+add_subdirectory(bspSpiWs2812)
 
 add_library(socBsp INTERFACE)
 target_link_libraries(socBsp INTERFACE bspInterruptsImpl bspMcu bspStdio

@@ -6,8 +6,13 @@ add_executable(
     src/systems/DemoSystem.cpp
     src/systems/RuntimeSystem.cpp
     src/systems/SysAdminSystem.cpp
-    src/systems/SafetySystem.cpp
-    src/main.cpp)
+    src/systems/SafetySystem.cpp)
+
+# ESP-IDF uses app_main() as entry point, which the ESP32 platform provides
+# directly (with BSP init). Other platforms use the generic app_main() here.
+if (NOT OPENBSW_PLATFORM STREQUAL "esp32")
+    target_sources(app.referenceApp PRIVATE src/main.cpp)
+endif ()
 
 if (PLATFORM_SUPPORT_TRANSPORT)
     target_sources(app.referenceApp PRIVATE src/systems/TransportSystem.cpp)

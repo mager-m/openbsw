@@ -5,8 +5,8 @@ This project provides a SDK to build professional, high quality embedded softwar
 This is a software stack specifically designed and developed for automotive purpose.
 
 This repository describes the complete environment required for building and testing the target,
-including support for both POSIX and the S32K148EVB platform. It provides the service layer,
-driver code and configuration files, along with detailed user documentation.
+including support for POSIX, the S32K148EVB platform, and the Arduino Nano ESP32. It provides
+the service layer, driver code and configuration files, along with detailed user documentation.
 
 If you are new to this, take a look at :ref:`learning_overview`.
 
@@ -49,6 +49,14 @@ Check ``CanSystem`` and ``DemoSystem`` for reference.
     - ``StaticBsp`` is a class which contains platform specific BSP modules like ADC, PWM and CAN.
 
     - ``BspSystem`` class is used to handle bsp modules and its cyclic functions with ``lifecycleManager``.
+
+- Arduino Nano ESP32:
+
+    - The ``executables/referenceApp/platforms/esp32/main/src/main.cpp`` is the entry point for the ESP32 platform.
+
+    - Uses ESP-IDF's native FreeRTOS and ``app_main()`` as the ESP-IDF entry point.
+
+    - BSP drivers use ESP-IDF APIs: GPIO driver, UART driver, LEDC (PWM), ADC oneshot, TWAI (CAN), and NVS (EEPROM emulation).
 
 Unit tests
 ----------
@@ -104,8 +112,8 @@ You can now explore the code, make your own changes and learn how it works.
 
 * Refer to :ref:`executable_application` page for detailed information about demo application
   and start making your own changes in DemoSystem.
-* Refer to posix :ref:`posix_main` and S32k148 :ref:`s32k1xx_main` pages for information
-  about BSP system handling.
+* Refer to posix :ref:`posix_main`, S32k148 :ref:`s32k1xx_main`, and :ref:`esp32_overview` pages
+  for information about BSP system handling.
 * Refer to :ref:`bspconfig_s32k148evb` page for Driver configuration and pin mapping.
 
 Also refer to the beginners guide pages below:
@@ -150,6 +158,7 @@ Eclipse OpenBSW is a trademark of the Eclipse Foundation.
 
     platforms/posix/index
     platforms/s32k148evb/index
+    platforms/esp32/index
 
 .. toctree::
     :maxdepth: 1
@@ -167,6 +176,7 @@ Eclipse OpenBSW is a trademark of the Eclipse Foundation.
     modules/common
     modules/posix
     modules/s32k1xx
+    modules/esp32
     modules/executables
     modules/mocks
 

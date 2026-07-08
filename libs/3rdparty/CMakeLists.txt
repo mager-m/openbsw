@@ -38,7 +38,10 @@ set(SUPPORT_EXPONENTIAL_SPECIFIERS
 
 add_subdirectory(printf)
 
-if (BUILD_TARGET_RTOS STREQUAL "FREERTOS")
+if (BUILD_TARGET_RTOS STREQUAL "FREERTOS"
+    AND NOT OPENBSW_PLATFORM STREQUAL "esp32")
+    # ESP32 provides its own freeRtos INTERFACE target (backed by ESP-IDF's
+    # FreeRTOS headers) in platforms/esp32/3rdparty/freertos_esp32/.
     add_subdirectory(freeRtos EXCLUDE_FROM_ALL)
 endif ()
 

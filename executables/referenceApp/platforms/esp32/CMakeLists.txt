@@ -1,0 +1,10 @@
+add_subdirectory(bspConfiguration)
+add_subdirectory(ethConfiguration)
+add_subdirectory(safety)
+add_subdirectory(main)
+
+if (BUILD_TARGET_RTOS STREQUAL "FREERTOS")
+    add_subdirectory(freeRtosCoreConfiguration)
+    add_library(freeRtosPort ALIAS freeRtosEsp32Port)
+    add_library(freeRtosPortImpl ALIAS freeRtosEsp32)
+endif ()

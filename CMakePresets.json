@@ -197,6 +197,51 @@
                 "CMAKE_CXX_FLAGS_RELWITHDEBINFO": "-g3 -Os -DNDEBUG",
                 "CMAKE_DEFAULT_BUILD_TYPE": "RelWithDebInfo"
             }
+        },
+        {
+            "name": "tests-esp32-debug",
+            "displayName": "Configure for testing ESP32 modules (debug)",
+            "description": "Configure for testing ESP32 modules (debug)",
+            "inherits": "_config-base",
+            "binaryDir": "${sourceDir}/build/tests/esp32/Debug",
+            "cacheVariables": {
+                "CMAKE_DEFAULT_BUILD_TYPE": "Debug",
+                "CMAKE_CONFIGURATION_TYPES": "Debug",
+                "BUILD_EXECUTABLE": "unitTest",
+                "OPENBSW_PLATFORM": "esp32"
+            }
+        },
+        {
+            "name": "tests-esp32-release",
+            "displayName": "Configure for testing ESP32 modules (release)",
+            "description": "Configure for testing ESP32 modules (release)",
+            "inherits": "_config-base",
+            "binaryDir": "${sourceDir}/build/tests/esp32/Release",
+            "cacheVariables": {
+                "CMAKE_DEFAULT_BUILD_TYPE": "Release",
+                "CMAKE_CONFIGURATION_TYPES": "Release",
+                "BUILD_EXECUTABLE": "unitTest",
+                "OPENBSW_PLATFORM": "esp32"
+            }
+        },
+        {
+            "name": "esp32-freertos",
+            "generator": "Ninja Multi-Config",
+            "displayName": "ESP32 FreeRTOS configuration",
+            "description": "Configure for Arduino Nano ESP32 platform using ESP-IDF toolchain",
+            "inherits": "_config-base",
+            "toolchainFile": "${sourceDir}/cmake/toolchains/Esp32.cmake",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "BUILD_EXECUTABLE": "referenceApp",
+                "BUILD_TARGET_PLATFORM": "ESP32",
+                "BUILD_TARGET_RTOS": "FREERTOS",
+                "CMAKE_ASM_FLAGS_RELWITHDEBINFO": "-g3",
+                "CMAKE_CONFIGURATION_TYPES": "RelWithDebInfo;Debug;Release",
+                "CMAKE_C_FLAGS_RELWITHDEBINFO": "-g3 -O2 -DNDEBUG",
+                "CMAKE_CXX_FLAGS_RELWITHDEBINFO": "-g3 -O2 -DNDEBUG",
+                "CMAKE_DEFAULT_BUILD_TYPE": "RelWithDebInfo"
+            }
         }
     ],
     "buildPresets": [
@@ -275,6 +320,26 @@
             "displayName": "S32K148 ThreadX build (Clang)",
             "description": "Build reference application for S32K148 platform with Clang (Release by default; for Debug use --config Debug)",
             "configurePreset": "s32k148-threadx-clang"
+        },
+        {
+            "name": "tests-esp32-debug",
+            "displayName": "Build tests of ESP32 modules (debug)",
+            "description": "Build tests of ESP32 modules (debug)",
+            "configurePreset": "tests-esp32-debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "tests-esp32-release",
+            "displayName": "Build tests of ESP32 modules (release)",
+            "description": "Build tests of ESP32 modules (release)",
+            "configurePreset": "tests-esp32-release",
+            "configuration": "Release"
+        },
+        {
+            "name": "esp32-freertos",
+            "displayName": "ESP32 FreeRTOS build",
+            "description": "Build reference application for Arduino Nano ESP32 platform",
+            "configurePreset": "esp32-freertos"
         }
     ],
     "testPresets": [
@@ -305,6 +370,20 @@
             "description": "Run tests of S32K1XX modules (release)",
             "configuration": "Release",
             "configurePreset": "tests-s32k1xx-release"
+        },
+        {
+            "name": "tests-esp32-debug",
+            "displayName": "Run tests of ESP32 modules (debug)",
+            "description": "Run tests of ESP32 modules (debug)",
+            "configuration": "Debug",
+            "configurePreset": "tests-esp32-debug"
+        },
+        {
+            "name": "tests-esp32-release",
+            "displayName": "Run tests of ESP32 modules (release)",
+            "description": "Run tests of ESP32 modules (release)",
+            "configuration": "Release",
+            "configurePreset": "tests-esp32-release"
         }
     ]
 }

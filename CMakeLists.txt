@@ -93,6 +93,10 @@ if (BUILD_RUST)
         set(Rust_CARGO_TARGET
             "thumbv7em-none-eabihf"
             CACHE STRING "Rust target triple")
+    elseif (BUILD_TARGET_PLATFORM STREQUAL "ESP32")
+        set(Rust_CARGO_TARGET
+            "xtensa-esp32s3-none-elf"
+            CACHE STRING "Rust target triple")
     endif ()
 
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/3rdparty/corrosion)
@@ -120,6 +124,9 @@ if (BUILD_EXECUTABLE STREQUAL "referenceApp")
     if (BUILD_TARGET_PLATFORM STREQUAL "S32K148EVB")
         set(OPENBSW_PLATFORM_DIR
             "${CMAKE_CURRENT_SOURCE_DIR}/platforms/s32k1xx")
+    elseif (BUILD_TARGET_PLATFORM STREQUAL "ESP32")
+        set(OPENBSW_PLATFORM_DIR
+            "${CMAKE_CURRENT_SOURCE_DIR}/platforms/esp32")
     else ()
         set(OPENBSW_PLATFORM_DIR "${CMAKE_CURRENT_SOURCE_DIR}/platforms/posix")
     endif ()
@@ -195,6 +202,14 @@ if (BUILD_EXECUTABLE STREQUAL "unitTest")
         add_subdirectory(platforms/s32k1xx/bsp/bspIo/test)
         add_subdirectory(platforms/s32k1xx/bsp/canflex2Transceiver/test)
         add_subdirectory(platforms/s32k1xx/bsp/bspUart/test)
+
+    elseif (OPENBSW_PLATFORM STREQUAL "esp32")
+
+        add_subdirectory(platforms/esp32/unitTest EXCLUDE_FROM_ALL)
+
+        add_subdirectory(platforms/esp32/bsp/bspGpio/test)
+        add_subdirectory(platforms/esp32/bsp/bspEepromDriver/test)
+        add_subdirectory(platforms/esp32/bsp/bspInterruptsImpl/test)
 
     else ()
         message(
