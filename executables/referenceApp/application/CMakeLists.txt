@@ -41,6 +41,37 @@ if (PLATFORM_SUPPORT_STORAGE)
     target_sources(app.referenceApp PRIVATE src/systems/StorageSystem.cpp)
 endif ()
 
+# BEGIN app node glue hook.
+# Optional external application-node build wiring. If an app-glue root providing
+# cmake/AppNodeGlue.cmake is available, it is included here so no
+# application-specific paths are hardcoded in OpenBSW. It is discovered whether
+# this repo sits beside the app repo (sibling checkout) or inside it (a submodule
+# at <app>/external/openbsw), or it can be given explicitly with -DAPP_GLUE_ROOT.
+if (PLATFORM_SUPPORT_CAN)
+    if (NOT DEFINED APP_GLUE_ROOT)
+        file(GLOB _app_glue_candidates
+             "${CMAKE_SOURCE_DIR}/../*/cmake/AppNodeGlue.cmake"   # sibling checkout
+             "${CMAKE_SOURCE_DIR}/../../cmake/AppNodeGlue.cmake") # submodule under <app>/external
+        if (_app_glue_candidates)
+            list(GET _app_glue_candidates 0 _app_glue_file)
+            get_filename_component(_app_glue_dir "${_app_glue_file}" DIRECTORY)
+            get_filename_component(APP_GLUE_ROOT "${_app_glue_dir}" DIRECTORY)
+        endif ()
+    endif ()
+    if (APP_GLUE_ROOT AND EXISTS "${APP_GLUE_ROOT}/cmake/AppNodeGlue.cmake")
+        set(APP_TARGET app.referenceApp)
+        include("${APP_GLUE_ROOT}/cmake/AppNodeGlue.cmake")
+    else ()
+        # app.cpp references the application-node seam under PLATFORM_SUPPORT_CAN,
+        # so the glue is required when CAN support is enabled.
+        message(
+            FATAL_ERROR
+            "app node glue not found; "
+            "pass -DAPP_GLUE_ROOT=<path to the app node checkout>")
+    endif ()
+endif ()
+# END app node glue hook.
+
 set_target_properties(app.referenceApp PROPERTIES SUFFIX ".elf")
 
 if (PLATFORM_SUPPORT_ROM_CHECK)

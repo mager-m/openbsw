@@ -74,6 +74,42 @@
             }
         },
         {
+            "name": "posix-node1",
+            "displayName": "POSIX node1",
+            "description": "referenceApp for POSIX/FreeRTOS with APP_NODE=node1",
+            "inherits": "posix-freertos",
+            "cacheVariables": {
+                "APP_NODE": "node1"
+            }
+        },
+        {
+            "name": "posix-node2",
+            "displayName": "POSIX node2",
+            "description": "referenceApp for POSIX/FreeRTOS with APP_NODE=node2",
+            "inherits": "posix-freertos",
+            "cacheVariables": {
+                "APP_NODE": "node2"
+            }
+        },
+        {
+            "name": "posix-node3",
+            "displayName": "POSIX node3",
+            "description": "referenceApp for POSIX/FreeRTOS with APP_NODE=node3",
+            "inherits": "posix-freertos",
+            "cacheVariables": {
+                "APP_NODE": "node3"
+            }
+        },
+        {
+            "name": "posix-node4",
+            "displayName": "POSIX node4",
+            "description": "referenceApp for POSIX/FreeRTOS with APP_NODE=node4",
+            "inherits": "posix-freertos",
+            "cacheVariables": {
+                "APP_NODE": "node4"
+            }
+        },
+        {
             "name": "posix-threadx",
             "displayName": "POSIX-THREADX compliant configuration",
             "description": "Configure for POSIX-compliant environment",
@@ -242,6 +278,19 @@
                 "CMAKE_CXX_FLAGS_RELWITHDEBINFO": "-g3 -O2 -DNDEBUG",
                 "CMAKE_DEFAULT_BUILD_TYPE": "RelWithDebInfo"
             }
+        },
+        {
+            "name": "posix-arm",
+            "displayName": "POSIX-FREERTOS cross for Pi Zero (armv6 armhf)",
+            "description": "Cross-compile the referenceApp for Raspberry Pi Zero (glibc armhf, hosted Linux)",
+            "inherits": "_config-base",
+            "toolchainFile": "${sourceDir}/cmake/toolchains/ArmLinux-gcc.cmake",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "BUILD_EXECUTABLE": "referenceApp",
+                "BUILD_TARGET_PLATFORM": "POSIX",
+                "BUILD_TARGET_RTOS": "FREERTOS"
+            }
         }
     ],
     "buildPresets": [
@@ -278,6 +327,34 @@
             "displayName": "build POSIX-FREERTOS",
             "description": "Build reference application for POSIX-compliant environment (Release by default; for Debug use --config Debug)",
             "configurePreset": "posix-freertos"
+        },
+        {
+            "name": "posix-node1",
+            "displayName": "build POSIX node1",
+            "description": "Build referenceApp with APP_NODE=node1 (Release)",
+            "configurePreset": "posix-node1",
+            "configuration": "Release"
+        },
+        {
+            "name": "posix-node2",
+            "displayName": "build POSIX node2",
+            "description": "Build referenceApp with APP_NODE=node2 (Release)",
+            "configurePreset": "posix-node2",
+            "configuration": "Release"
+        },
+        {
+            "name": "posix-node3",
+            "displayName": "build POSIX node3",
+            "description": "Build referenceApp with APP_NODE=node3 (Release)",
+            "configurePreset": "posix-node3",
+            "configuration": "Release"
+        },
+        {
+            "name": "posix-node4",
+            "displayName": "build POSIX node4",
+            "description": "Build referenceApp with APP_NODE=node4 (Release)",
+            "configurePreset": "posix-node4",
+            "configuration": "Release"
         },
         {
             "name": "posix-threadx",
@@ -340,6 +417,12 @@
             "displayName": "ESP32 FreeRTOS build",
             "description": "Build reference application for Arduino Nano ESP32 platform",
             "configurePreset": "esp32-freertos"
+        },
+        {
+            "name": "posix-arm",
+            "displayName": "build POSIX-FREERTOS cross for Pi Zero (armv6 armhf)",
+            "description": "Build the referenceApp for Raspberry Pi Zero (Release by default; for Debug use --config Debug)",
+            "configurePreset": "posix-arm"
         }
     ],
     "testPresets": [

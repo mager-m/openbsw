@@ -14,6 +14,14 @@ uint8_t const responseData22Cf01[]
     = {0x01, 0x02, 0x00, 0x02, 0x22, 0x02, 0x16, 0x0F, 0x01, 0x00, 0x00, 0x6D,
        0x2F, 0x00, 0x00, 0x01, 0x06, 0x00, 0x00, 0x8F, 0xE0, 0x00, 0x00, 0x01};
 
+// DID 0xF190 SW-version, ASCII, readable in every session. The value comes from
+// the APP_SWID compile define when set at build time; the fallback keeps
+// referenceApp builds without it compiling unchanged.
+#ifndef APP_SWID
+#define APP_SWID "0.1.0"
+#endif
+uint8_t const responseData22F190[] = APP_SWID; // string literal, incl trailing NUL
+
 etl::array<uint8_t, 3> storedData2eCf03 = {0};
 
 UdsSystem::UdsSystem(
@@ -48,6 +56,7 @@ UdsSystem::UdsSystem(
 , _requestRoutineResults()
 , _read22Cf01(0xCF01, responseData22Cf01)
 , _read22Cf02()
+, _read22F190(0xF190, responseData22F190, sizeof(responseData22F190) - 1U) // len drops NUL
 , _write2eCf03(0xCF03, storedData2eCf03)
 , _testerPresent()
 , _context(context)
@@ -110,6 +119,7 @@ void UdsSystem::addDiagJobs()
     (void)_jobRoot.addAbstractDiagJob(_readDataByIdentifier);
     (void)_jobRoot.addAbstractDiagJob(_read22Cf01);
     (void)_jobRoot.addAbstractDiagJob(_read22Cf02);
+    (void)_jobRoot.addAbstractDiagJob(_read22F190);
 
     // 2E - WriteDataByIdentifier
     (void)_jobRoot.addAbstractDiagJob(_writeDataByIdentifier);
@@ -133,6 +143,7 @@ void UdsSystem::removeDiagJobs()
     _jobRoot.removeAbstractDiagJob(_readDataByIdentifier);
     _jobRoot.removeAbstractDiagJob(_read22Cf01);
     _jobRoot.removeAbstractDiagJob(_read22Cf02);
+    _jobRoot.removeAbstractDiagJob(_read22F190);
 
     // 2E - WriteDataByIdentifier
     _jobRoot.removeAbstractDiagJob(_writeDataByIdentifier);

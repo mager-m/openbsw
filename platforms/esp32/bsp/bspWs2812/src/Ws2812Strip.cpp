@@ -40,6 +40,80 @@ rmt_symbol_word_t makeSymbol(
     symbol.duration1         = duration1;
     return symbol;
 }
+
+// One RMT TX channel and the two encoders are shared by every strip: the S3 has
+// only 4 TX-capable RMT channels, and a node may drive more strips than that.
+// show() rebinds the channel to the calling strip's GPIO. The encoders are GPIO
+// independent, so they are created once. Not re-entrant: strips must be shown
+// from a single task (the node component's async task guarantees this).
+rmt_channel_handle_t sChannel      = nullptr;
+int sChannelGpio                   = -1; // GPIO the channel is currently bound to
+rmt_encoder_handle_t sBytesEncoder = nullptr;
+rmt_encoder_handle_t sCopyEncoder  = nullptr;
+
+// Create the shared byte/copy encoders once. Returns true if both are ready.
+bool ensureEncoders()
+{
+    if (sBytesEncoder == nullptr)
+    {
+        rmt_bytes_encoder_config_t bytesCfg = {};
+        bytesCfg.bit0            = makeSymbol(1U, WS2812_T0H_TICKS, 0U, WS2812_T0L_TICKS);
+        bytesCfg.bit1            = makeSymbol(1U, WS2812_T1H_TICKS, 0U, WS2812_T1L_TICKS);
+        bytesCfg.flags.msb_first = 1U;
+        if (rmt_new_bytes_encoder(&bytesCfg, &sBytesEncoder) != ESP_OK)
+        {
+            sBytesEncoder = nullptr;
+            return false;
+        }
+    }
+    if (sCopyEncoder == nullptr)
+    {
+        rmt_copy_encoder_config_t copyCfg = {};
+        if (rmt_new_copy_encoder(&copyCfg, &sCopyEncoder) != ESP_OK)
+        {
+            sCopyEncoder = nullptr;
+            return false;
+        }
+    }
+    return true;
+}
+
+// Bind the shared TX channel to gpioNum, (re)creating it if it is bound to a
+// different GPIO. Returns true if the channel is enabled and on gpioNum.
+bool ensureChannelFor(uint8_t const gpioNum)
+{
+    if ((sChannel != nullptr) && (sChannelGpio == static_cast<int>(gpioNum)))
+    {
+        return true;
+    }
+    if (sChannel != nullptr)
+    {
+        (void)rmt_disable(sChannel);
+        (void)rmt_del_channel(sChannel);
+        sChannel     = nullptr;
+        sChannelGpio = -1;
+    }
+
+    rmt_channel_handle_t channel       = nullptr;
+    rmt_tx_channel_config_t channelCfg = {};
+    channelCfg.gpio_num                = static_cast<gpio_num_t>(gpioNum);
+    channelCfg.clk_src                 = RMT_CLK_SRC_DEFAULT;
+    channelCfg.resolution_hz           = WS2812_RESOLUTION_HZ;
+    channelCfg.mem_block_symbols       = WS2812_MEM_BLOCK_SYMBOLS;
+    channelCfg.trans_queue_depth       = WS2812_TRANS_QUEUE_DEPTH;
+    if (rmt_new_tx_channel(&channelCfg, &channel) != ESP_OK)
+    {
+        return false;
+    }
+    if (rmt_enable(channel) != ESP_OK)
+    {
+        (void)rmt_del_channel(channel);
+        return false;
+    }
+    sChannel     = channel;
+    sChannelGpio = static_cast<int>(gpioNum);
+    return true;
+}
 } // namespace
 
 ::bsp::BspReturnCode Ws2812Strip::init(uint8_t const gpioNum, uint16_t const numLeds, uint8_t* const grbBuffer)
@@ -52,53 +126,15 @@ rmt_symbol_word_t makeSymbol(
     {
         return ::bsp::BSP_ERROR;
     }
-
-    rmt_channel_handle_t channel = nullptr;
-    rmt_tx_channel_config_t channelCfg = {};
-    channelCfg.gpio_num                = static_cast<gpio_num_t>(gpioNum);
-    channelCfg.clk_src                 = RMT_CLK_SRC_DEFAULT;
-    channelCfg.resolution_hz           = WS2812_RESOLUTION_HZ;
-    channelCfg.mem_block_symbols       = WS2812_MEM_BLOCK_SYMBOLS;
-    channelCfg.trans_queue_depth       = WS2812_TRANS_QUEUE_DEPTH;
-    if (rmt_new_tx_channel(&channelCfg, &channel) != ESP_OK)
+    if (!ensureEncoders())
     {
         return ::bsp::BSP_ERROR;
     }
 
-    rmt_encoder_handle_t bytesEncoder = nullptr;
-    rmt_bytes_encoder_config_t bytesCfg = {};
-    bytesCfg.bit0            = makeSymbol(1U, WS2812_T0H_TICKS, 0U, WS2812_T0L_TICKS);
-    bytesCfg.bit1            = makeSymbol(1U, WS2812_T1H_TICKS, 0U, WS2812_T1L_TICKS);
-    bytesCfg.flags.msb_first = 1U;
-    if (rmt_new_bytes_encoder(&bytesCfg, &bytesEncoder) != ESP_OK)
-    {
-        (void)rmt_del_channel(channel);
-        return ::bsp::BSP_ERROR;
-    }
-
-    rmt_encoder_handle_t copyEncoder = nullptr;
-    rmt_copy_encoder_config_t copyCfg = {};
-    if (rmt_new_copy_encoder(&copyCfg, &copyEncoder) != ESP_OK)
-    {
-        (void)rmt_del_encoder(bytesEncoder);
-        (void)rmt_del_channel(channel);
-        return ::bsp::BSP_ERROR;
-    }
-
-    if (rmt_enable(channel) != ESP_OK)
-    {
-        (void)rmt_del_encoder(copyEncoder);
-        (void)rmt_del_encoder(bytesEncoder);
-        (void)rmt_del_channel(channel);
-        return ::bsp::BSP_ERROR;
-    }
-
-    _grbBuffer    = grbBuffer;
-    _numLeds      = numLeds;
-    _channel      = channel;
-    _bytesEncoder = bytesEncoder;
-    _copyEncoder  = copyEncoder;
-    _initialized  = true;
+    _grbBuffer   = grbBuffer;
+    _numLeds     = numLeds;
+    _gpioNum     = gpioNum;
+    _initialized = true;
     return ::bsp::BSP_OK;
 }
 
@@ -141,10 +177,10 @@ void Ws2812Strip::clear()
     {
         return ::bsp::BSP_ERROR;
     }
-
-    auto const channel      = static_cast<rmt_channel_handle_t>(_channel);
-    auto const bytesEncoder = static_cast<rmt_encoder_handle_t>(_bytesEncoder);
-    auto const copyEncoder  = static_cast<rmt_encoder_handle_t>(_copyEncoder);
+    if (!ensureChannelFor(_gpioNum))
+    {
+        return ::bsp::BSP_ERROR;
+    }
 
     rmt_transmit_config_t txConfig = {};
     txConfig.loop_count            = 0;      // transmit once
@@ -152,7 +188,7 @@ void Ws2812Strip::clear()
 
     // Stream the GRB pixel bytes, MSB first, as WS2812 bit symbols.
     size_t const payloadBytes = static_cast<size_t>(_numLeds) * 3U;
-    if (rmt_transmit(channel, bytesEncoder, _grbBuffer, payloadBytes, &txConfig) != ESP_OK)
+    if (rmt_transmit(sChannel, sBytesEncoder, _grbBuffer, payloadBytes, &txConfig) != ESP_OK)
     {
         return ::bsp::BSP_ERROR;
     }
@@ -161,12 +197,12 @@ void Ws2812Strip::clear()
     // valid until rmt_tx_wait_all_done() below returns.
     rmt_symbol_word_t const resetSymbol
         = makeSymbol(0U, WS2812_RESET_HALF_TICKS, 0U, WS2812_RESET_HALF_TICKS);
-    if (rmt_transmit(channel, copyEncoder, &resetSymbol, sizeof(resetSymbol), &txConfig) != ESP_OK)
+    if (rmt_transmit(sChannel, sCopyEncoder, &resetSymbol, sizeof(resetSymbol), &txConfig) != ESP_OK)
     {
         return ::bsp::BSP_ERROR;
     }
 
-    if (rmt_tx_wait_all_done(channel, WS2812_TX_TIMEOUT_MS) != ESP_OK)
+    if (rmt_tx_wait_all_done(sChannel, WS2812_TX_TIMEOUT_MS) != ESP_OK)
     {
         return ::bsp::BSP_ERROR;
     }

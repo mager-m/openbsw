@@ -29,8 +29,9 @@ public:
      */
     struct DeviceConfig
     {
-        char const* name; /// SocketCAN interface name
-        uint8_t busId;    /// currently not used
+        char const* name;         /// SocketCAN interface name
+        uint8_t busId;            /// currently not used
+        bool enableCanFd = false; /// opt in to CAN_RAW_FD_FRAMES; false for classic MCP2515
     };
 
     explicit SocketCanTransceiver(DeviceConfig const& config);

@@ -185,16 +185,19 @@ void SocketCanTransceiver::guardedOpen()
         return;
     }
 
-    int const enable_canfd = 1;
-    error = setsockopt(fd, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enable_canfd, sizeof(enable_canfd));
-    if (error < 0)
+    if (_config.enableCanFd)
     {
-        Logger::error(
-            CAN,
-            "[SocketCanTransceiver] Failed to setsockopt socket (node=%s, error=%d)",
-            name,
-            error);
-        return;
+        int const enable_canfd = 1;
+        error = setsockopt(fd, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enable_canfd, sizeof(enable_canfd));
+        if (error < 0)
+        {
+            Logger::error(
+                CAN,
+                "[SocketCanTransceiver] Failed to setsockopt CAN FD (node=%s, error=%d)",
+                name,
+                error);
+            return;
+        }
     }
 
     error = fcntl(fd, F_SETFL, O_NONBLOCK);

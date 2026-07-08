@@ -7,14 +7,15 @@
  * WS2812 / NeoPixel addressable-LED strip driver for ESP32-S3 using the RMT
  * (Remote Control) TX peripheral.
  *
- * One instance drives one strip on one GPIO through one dedicated RMT TX
- * channel. The pixel data is stored in a caller-owned buffer in GRB byte order
- * (the wire order WS2812 LEDs expect), 3 bytes per LED. Colours are emitted at
- * 800 kHz using a 10 MHz RMT resolution (1 tick = 0.1 us).
+ * One instance drives one strip on one GPIO. All instances SHARE a single RMT TX
+ * channel that show() re-points to the caller's GPIO on demand, because the
+ * ESP32-S3 has only 4 TX-capable RMT channels but a node may drive more strips
+ * (the Light node has 6). This assumes the strips are shown from a single task
+ * (true for a node component on one async task): show() is not re-entrant.
  *
- * The public interface deliberately exposes no ESP-IDF types so that consumers
- * do not need the esp-idf driver headers on their include path; the RMT channel
- * and encoder handles are held as opaque pointers.
+ * The pixel data is stored in a caller-owned buffer in GRB byte order (the wire
+ * order WS2812 LEDs expect), 3 bytes per LED, emitted at 800 kHz using a 10 MHz
+ * RMT resolution (1 tick = 0.1 us). The public interface exposes no ESP-IDF types.
  */
 #pragma once
 
@@ -34,7 +35,9 @@ public:
     Ws2812Strip& operator=(Ws2812Strip const&) = delete;
 
     /**
-     * Set up the RMT TX channel and WS2812 bit encoders for this strip.
+     * Record this strip's GPIO/buffer and create the shared WS2812 bit encoders
+     * on first use. The shared RMT TX channel is (re)bound to this GPIO lazily by
+     * show(), so init() allocates no per-strip channel.
      *
      * \param gpioNum    GPIO the WS2812 data line is wired to.
      * \param numLeds    Number of LEDs on the strip.
@@ -70,13 +73,11 @@ public:
 private:
     uint8_t scale(uint8_t value) const;
 
-    uint8_t* _grbBuffer   = nullptr;
-    void* _channel        = nullptr; // rmt_channel_handle_t
-    void* _bytesEncoder   = nullptr; // rmt_encoder_handle_t (GRB bit stream)
-    void* _copyEncoder    = nullptr; // rmt_encoder_handle_t (reset pulse)
-    uint16_t _numLeds     = 0U;
-    uint8_t _brightness   = 255U;
-    bool _initialized     = false;
+    uint8_t* _grbBuffer = nullptr;
+    uint16_t _numLeds   = 0U;
+    uint8_t _gpioNum    = 0U;
+    uint8_t _brightness = 255U;
+    bool _initialized   = false;
 };
 
 } // namespace bsp

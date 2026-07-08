@@ -15,6 +15,11 @@ class CanSystem final
 , private ::async::IRunnable
 {
 public:
+    // vcan0..vcan3 map to CAN_0..CAN_3. A single-node build only brings up CAN_0
+    // (vcan0); a multi-bus build uses all four. Buses whose SocketCAN interface
+    // is absent stay inactive.
+    static constexpr uint8_t NUM_BUSES = 4U;
+
     // [PUBLIC_API_START]
     explicit CanSystem(::async::ContextType context);
     CanSystem(CanSystem const&)            = delete;
@@ -29,11 +34,15 @@ public:
 private:
     void execute() final;
 
-private:
     ::async::TimeoutType _timeout;
     ::async::ContextType _context;
 
-    ::can::SocketCanTransceiver _canTransceiver;
+    ::can::SocketCanTransceiver _can0;
+    ::can::SocketCanTransceiver _can1;
+    ::can::SocketCanTransceiver _can2;
+    ::can::SocketCanTransceiver _can3;
+    ::can::SocketCanTransceiver* const _bus[NUM_BUSES];
+    bool _active[NUM_BUSES];
 };
 
 } // namespace systems
