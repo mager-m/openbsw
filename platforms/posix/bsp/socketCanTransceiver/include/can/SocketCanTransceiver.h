@@ -39,8 +39,8 @@ public:
     {
         char const* name;         /// SocketCAN interface name
         uint8_t busId;            /// currently not used
-        bool enableCanFd;         /// open the socket in CAN FD mode and send frames as FD
-        bool enableBitRateSwitch; /// use Bit Rate Switch (data-phase bitrate) on TX FD frames
+        bool enableCanFd         = false; /// open the socket in CAN FD mode and send frames as FD; false for classic MCP2515
+        bool enableBitRateSwitch = false; /// use Bit Rate Switch (data-phase bitrate) on TX FD frames
     };
 
     explicit SocketCanTransceiver(DeviceConfig const& config);

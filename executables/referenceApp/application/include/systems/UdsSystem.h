@@ -117,6 +117,7 @@ private:
     RequestRoutineResults _requestRoutineResults;
     ReadIdentifierFromMemory _read22Cf01;
     ReadIdentifierPot _read22Cf02;
+    ReadIdentifierFromMemory _read22F190;
     WriteIdentifierToMemory _write2eCf03;
 #ifdef PLATFORM_SUPPORT_UDS_DEMO_SERVICES
     ReadIdentifierFromMemory _readF190;

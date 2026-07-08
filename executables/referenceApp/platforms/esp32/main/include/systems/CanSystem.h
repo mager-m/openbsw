@@ -31,8 +31,12 @@ private:
 
     ::async::TimeoutType _timeout;
     ::async::ContextType _context;
+    // CAN_0 = TWAI (native), CAN_1..CAN_3 = three MCP2515 controllers on one SPI
+    // bus. Single-node builds use only CAN_0; multi-bus builds use all four.
     ::can::TwaiCanTransceiver _canTransceiver;
     ::can::Mcp2515CanTransceiver _mcpTransceiver;
+    ::can::Mcp2515CanTransceiver _mcpTransceiver2;
+    ::can::Mcp2515CanTransceiver _mcpTransceiver3;
 };
 
 } // namespace systems
