@@ -1,0 +1,101 @@
+{
+    "version": "2.0.0",
+    "options": {
+        "env": {
+            "IDF_TARGET": "esp32s3",
+            "CCACHE_DISABLE": "1"
+        }
+    },
+    "tasks": [
+        {
+            "label": "ESP32: Full Build & Flash",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "ESP32: 1 - Build OpenBSW",
+                "ESP32: 2 - Archive App Objects",
+                "ESP32: 3 - Build IDF Project",
+                "ESP32: 4 - Flash"
+            ],
+            "group": { "kind": "build", "isDefault": false },
+            "problemMatcher": []
+        },
+        {
+            "label": "ESP32: Build Only",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "ESP32: 1 - Build OpenBSW",
+                "ESP32: 2 - Archive App Objects",
+                "ESP32: 3 - Build IDF Project"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "ESP32: 1 - Build OpenBSW",
+            "type": "shell",
+            "command": "cmake --build build/esp32-freertos --config RelWithDebInfo; exit 0",
+            "options": { "cwd": "${workspaceFolder}" },
+            "detail": "Link failure is expected (resolved by step 3)",
+            "problemMatcher": []
+        },
+        {
+            "label": "ESP32: 2 - Archive App Objects",
+            "type": "shell",
+            "command": "xtensa-esp32s3-elf-ar rcs build/esp32-freertos/libappReferenceApp.a build/esp32-freertos/executables/referenceApp/application/CMakeFiles/app.referenceApp.dir/RelWithDebInfo/src/app/app.cpp.obj build/esp32-freertos/executables/referenceApp/application/CMakeFiles/app.referenceApp.dir/RelWithDebInfo/src/app/CanDemoListener.cpp.obj build/esp32-freertos/executables/referenceApp/application/CMakeFiles/app.referenceApp.dir/RelWithDebInfo/src/console/console.cpp.obj build/esp32-freertos/executables/referenceApp/application/CMakeFiles/app.referenceApp.dir/RelWithDebInfo/src/logger/logger.cpp.obj build/esp32-freertos/executables/referenceApp/application/CMakeFiles/app.referenceApp.dir/RelWithDebInfo/src/systems/DemoSystem.cpp.obj build/esp32-freertos/executables/referenceApp/application/CMakeFiles/app.referenceApp.dir/RelWithDebInfo/src/systems/RuntimeSystem.cpp.obj build/esp32-freertos/executables/referenceApp/application/CMakeFiles/app.referenceApp.dir/RelWithDebInfo/src/systems/SafetySystem.cpp.obj build/esp32-freertos/executables/referenceApp/application/CMakeFiles/app.referenceApp.dir/RelWithDebInfo/src/systems/StorageSystem.cpp.obj build/esp32-freertos/executables/referenceApp/application/CMakeFiles/app.referenceApp.dir/RelWithDebInfo/src/systems/SysAdminSystem.cpp.obj build/esp32-freertos/executables/referenceApp/application/CMakeFiles/app.referenceApp.dir/RelWithDebInfo/src/systems/TransportSystem.cpp.obj build/esp32-freertos/executables/referenceApp/application/CMakeFiles/app.referenceApp.dir/RelWithDebInfo/src/systems/UdsSystem.cpp.obj build/esp32-freertos/executables/referenceApp/application/CMakeFiles/app.referenceApp.dir/RelWithDebInfo/src/systems/DoCanSystem.cpp.obj build/esp32-freertos/executables/referenceApp/application/CMakeFiles/app.referenceApp.dir/RelWithDebInfo/src/uds/ReadIdentifierPot.cpp.obj",
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": []
+        },
+        {
+            "label": "ESP32: 3 - Build IDF Project",
+            "type": "shell",
+            "command": "cmake --build build",
+            "options": { "cwd": "${workspaceFolder}/executables/referenceApp/platforms/esp32/idf_project" },
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "ESP32: 4 - Flash",
+            "type": "shell",
+            "command": "idf.py -p ${input:comPort} flash",
+            "options": { "cwd": "${workspaceFolder}/executables/referenceApp/platforms/esp32/idf_project" },
+            "problemMatcher": []
+        },
+        {
+            "label": "ESP32: Configure OpenBSW",
+            "type": "shell",
+            "command": "cmake --preset esp32-freertos",
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": []
+        },
+        {
+            "label": "ESP32: Configure IDF Project",
+            "type": "shell",
+            "command": "cmake -G Ninja -S . -B build -DIDF_TARGET=esp32s3 -DSDKCONFIG_DEFAULTS=sdkconfig.defaults -DPYTHON_DEPS_CHECKED=1 -DCCACHE_ENABLE=0",
+            "options": { "cwd": "${workspaceFolder}/executables/referenceApp/platforms/esp32/idf_project" },
+            "problemMatcher": []
+        },
+        {
+            "label": "ESP32: Clean All",
+            "type": "shell",
+            "command": "cmake -E rm -rf build/esp32-freertos executables/referenceApp/platforms/esp32/idf_project/build executables/referenceApp/platforms/esp32/idf_project/sdkconfig",
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": []
+        },
+        {
+            "label": "ESP32: Monitor USB Console",
+            "type": "shell",
+            "command": "idf.py -p ${input:comPort} monitor",
+            "options": { "cwd": "${workspaceFolder}/executables/referenceApp/platforms/esp32/idf_project" },
+            "problemMatcher": [],
+            "isBackground": true,
+            "presentation": { "reveal": "always", "panel": "dedicated" }
+        }
+    ],
+    "inputs": [
+        {
+            "id": "comPort",
+            "type": "promptString",
+            "description": "Serial port (e.g. COM9 on Windows, /dev/ttyACM0 on Linux)",
+            "default": "COM9"
+        }
+    ]
+}
