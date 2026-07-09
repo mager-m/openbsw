@@ -39,12 +39,13 @@
 #include "systems/DoCanSystem.h"
 #endif // defined(PLATFORM_SUPPORT_CAN) && defined(PLATFORM_SUPPORT_TRANSPORT)
 
-// Application-node registration seam. Node components are supplied by an external
-// app-glue root at build time (see application/CMakeLists.txt); the active node
-// is selected via -DAPP_NODE. Registered during startup below.
-#ifdef PLATFORM_SUPPORT_CAN
+// Application-node registration seam. When an external app-glue root is present at
+// build time it defines APP_NODE_GLUE and supplies this header (see
+// application/CMakeLists.txt); the active node is selected via -DAPP_NODE. Without
+// glue the stock referenceApp builds and this seam compiles out.
+#if defined(PLATFORM_SUPPORT_CAN) && defined(APP_NODE_GLUE)
 #include <appNode/AppNodeRegister.h>
-#endif // PLATFORM_SUPPORT_CAN
+#endif
 
 #if defined(PLATFORM_SUPPORT_TRANSPORT) && defined(PLATFORM_SUPPORT_UDS)
 #include "systems/UdsSystem.h"
@@ -322,10 +323,9 @@ void startApp()
         9U);
     // clang-format on
 
-    // Register the app node (selected via -DAPP_NODE) at runlevel 9.
-#ifdef PLATFORM_SUPPORT_CAN
+#if defined(PLATFORM_SUPPORT_CAN) && defined(APP_NODE_GLUE)
     appRegisterNode(lifecycleManager);
-#endif // PLATFORM_SUPPORT_CAN
+#endif
 
     lifecycleManager.transitionToLevel(MaxNumLevels);
 
