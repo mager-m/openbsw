@@ -151,10 +151,15 @@ Pin Configuration
    "UART TX", "43", "Also available via USB"
    "UART RX", "44", "Also available via USB"
    "PWM", "5", "LEDC output (D2 header pin)"
-   "CAN TX", "5", "Shared with PWM; needs external transceiver"
-   "CAN RX", "6", "Needs external transceiver"
+   "CAN TX", "5", "Default (configurable); shared with PWM; needs external transceiver"
+   "CAN RX", "6", "Default (configurable); needs external transceiver"
    "RGB LED", "48", "WS2812 — not driven (needs RMT driver)"
    "ADC", "1-4", "4 channels configured"
+
+The TWAI (CAN) pins default to GPIO5 (TX) and GPIO6 (RX) and are configurable at
+build time via ``-DTWAI_TX_PIN`` and ``-DTWAI_RX_PIN``, for example
+``-DTWAI_TX_PIN=43 -DTWAI_RX_PIN=44`` to use the D1/D0 header pins. Both require an
+external CAN transceiver (for example SN65HVD230).
 
 Feature Support
 ---------------
