@@ -15,9 +15,7 @@ class CanSystem final
 , private ::async::IRunnable
 {
 public:
-    // vcan0..vcan3 map to CAN_0..CAN_3. A single-node build only brings up CAN_0
-    // (vcan0); a multi-bus build uses all four. Buses whose SocketCAN interface
-    // is absent stay inactive.
+    // CAN_0..CAN_3, mapped to interfaces vcan0..vcan3 by default (see CanSystem.cpp).
     static constexpr uint8_t NUM_BUSES = 4U;
 
     // [PUBLIC_API_START]

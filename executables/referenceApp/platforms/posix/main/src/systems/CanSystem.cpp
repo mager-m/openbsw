@@ -15,11 +15,11 @@ static int const MAX_RECEIVED_PER_RUN          = 3;
 namespace
 {
 
-// SocketCAN interface for each bus: an override env var and the default name.
-// Bus 0 defaults to vcan0 (the virtual sim bus) and honours CAN_IFACE for a real
-// adapter (e.g. a CANable); buses 1..3 default to vcan1..vcan3 and honour
-// CAN_IFACE1..3. A single-node build only needs bus 0; multi-bus builds use the
-// extra buses.
+// Per-bus SocketCAN interface: an override env var and a default name. Bus 0
+// defaults to vcan0 and honours CAN_IFACE so it can point at a real adapter (e.g. a
+// CANable); buses 1..3 default to vcan1..vcan3 and honour CAN_IFACE1..3. Only the
+// buses whose interface actually exists are opened (see run()), so unused buses
+// cost nothing.
 struct IfaceConfig
 {
     char const* env;   // override the interface name
@@ -79,9 +79,8 @@ void CanSystem::run()
 {
     for (uint8_t i = 0U; i < NUM_BUSES; ++i)
     {
-        // Bring up only the buses whose SocketCAN interface exists. A single-node
-        // build has just vcan0; a multi-bus build has all four. Skipping absent
-        // buses avoids a failed-open log on every boot for the unused ones.
+        // Skip buses whose interface is absent so unused buses do not log a
+        // failed open on every boot.
         if (::if_nametoindex(canConfig[i].name) == 0U)
         {
             continue;

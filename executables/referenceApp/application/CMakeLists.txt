@@ -61,13 +61,13 @@ if (PLATFORM_SUPPORT_CAN)
     if (APP_GLUE_ROOT AND EXISTS "${APP_GLUE_ROOT}/cmake/AppNodeGlue.cmake")
         set(APP_TARGET app.referenceApp)
         include("${APP_GLUE_ROOT}/cmake/AppNodeGlue.cmake")
+        target_compile_definitions(app.referenceApp PRIVATE APP_NODE_GLUE)
     else ()
-        # app.cpp references the application-node seam under PLATFORM_SUPPORT_CAN,
-        # so the glue is required when CAN support is enabled.
-        message(
-            FATAL_ERROR
-            "app node glue not found; "
-            "pass -DAPP_GLUE_ROOT=<path to the app node checkout>")
+        # No glue: build the stock referenceApp. The application-node seam in
+        # app.cpp is guarded by APP_NODE_GLUE and compiles out here.
+        message(STATUS
+            "app node glue not found; building the stock referenceApp "
+            "(pass -DAPP_GLUE_ROOT=<app node checkout> to build an application node)")
     endif ()
 endif ()
 # END app node glue hook.
