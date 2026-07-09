@@ -1,5 +1,8 @@
 # Hosted-Linux (glibc) cross toolchain for the Raspberry Pi Zero.
 #
+# Not tested on hardware: the cross build compiles and links, but the resulting
+# binary has not been run on a Pi Zero.
+#
 # Target: BCM2835 / ARM1176JZF-S, armv6 hard-float (armhf).
 # This is the POSIX platform's FreeRTOS-simulator build (pthreads/signals over
 # glibc), NOT a bare-metal image, so it does NOT reuse the freestanding
