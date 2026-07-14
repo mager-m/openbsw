@@ -9,9 +9,9 @@
  *
  * One instance drives one strip on one GPIO. All instances SHARE a single RMT TX
  * channel that show() re-points to the caller's GPIO on demand, because the
- * ESP32-S3 has only 4 TX-capable RMT channels but a node may drive more strips
- * (the Light node has 6). This assumes the strips are shown from a single task
- * (true for a node component on one async task): show() is not re-entrant.
+ * ESP32-S3 has only 4 TX-capable RMT channels but an application may drive more
+ * strips than that. This assumes the strips are shown from a single task:
+ * show() is not re-entrant.
  *
  * The pixel data is stored in a caller-owned buffer in GRB byte order (the wire
  * order WS2812 LEDs expect), 3 bytes per LED, emitted at 800 kHz using a 10 MHz

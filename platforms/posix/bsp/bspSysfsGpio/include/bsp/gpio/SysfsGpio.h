@@ -7,10 +7,9 @@
  * Digital GPIO driver for Linux hosts via the sysfs interface
  * (/sys/class/gpio). POSIX counterpart to the ESP32 GPIO driver.
  *
- * This is the Raspberry Pi digital-output path for the H-bridge enable and
- * direction lines driven by the Engine node. Each configured pin is exported
- * through /sys/class/gpio/export, its direction is set to "out" or "in", and
- * output pins are latched to a caller-supplied initial level.
+ * Each configured pin is exported through /sys/class/gpio/export, its direction
+ * is set to "out" or "in", and output pins are latched to a caller-supplied
+ * initial level.
  *
  * The driver uses only plain POSIX file I/O (open/read/write/close); it does
  * not depend on libgpiod or any other external library. No dynamic
@@ -23,10 +22,10 @@
  *
  * Example (caller-owned) configuration array:
  * \code
- * static bsp::SysfsGpio::PinConfig const ENGINE_PINS[] = {
- *     {17U, true,  false}, // R_EN, output, start low
- *     {27U, true,  false}, // L_EN, output, start low
- *     {22U, false, false}, // fault input
+ * static bsp::SysfsGpio::PinConfig const PINS[] = {
+ *     {17U, true,  false}, // output, start low
+ *     {27U, true,  false}, // output, start low
+ *     {22U, false, false}, // input
  * };
  * \endcode
  */
@@ -48,7 +47,7 @@ public:
      */
     struct PinConfig
     {
-        /** Linux GPIO number (the value written to /sys/class/gpio/export). */
+        /** GPIO line offset within the SoC controller (base is resolved at init). */
         uint32_t gpioNum;
         /** true configures the line as an output, false as an input. */
         bool output;
