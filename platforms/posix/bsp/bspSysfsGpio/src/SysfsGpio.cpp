@@ -2,11 +2,13 @@
 
 #include "bsp/gpio/SysfsGpio.h"
 
+#include <dirent.h>
 #include <fcntl.h>
 #include <unistd.h>
 
 #include <cerrno>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 namespace bsp
@@ -21,6 +23,80 @@ namespace
 {
 
 char const SYSFS_GPIO_EXPORT[] = "/sys/class/gpio/export";
+
+/**
+ * Read an unsigned decimal integer from a sysfs attribute file.
+ *
+ * \return true if the file was read and parsed.
+ */
+bool readUintFile(char const* const path, unsigned long& value)
+{
+    int const fd = ::open(path, O_RDONLY);
+    if (fd < 0)
+    {
+        return false;
+    }
+    char buf[32];
+    ssize_t const got = ::read(fd, buf, sizeof(buf) - 1U);
+    (void)::close(fd);
+    if (got <= 0)
+    {
+        return false;
+    }
+    buf[got] = '\0';
+    char* end                  = nullptr;
+    unsigned long const parsed = ::strtoul(buf, &end, 10);
+    if (end == buf)
+    {
+        return false;
+    }
+    value = parsed;
+    return true;
+}
+
+/**
+ * Resolve the base of the SoC GPIO controller in the legacy sysfs numberspace.
+ *
+ * That numberspace is global: a line's number is its controller's base plus the
+ * line offset within that controller. The SoC controller's base is not
+ * guaranteed to be zero (6.x kernels commonly place it at 512), so a raw offset
+ * addresses the wrong line. This returns the base of the controller exposing
+ * the most lines (the SoC bank), or 0 if none can be read (for example on a
+ * host without /sys/class/gpio), which leaves offsets unchanged as on a
+ * base-zero system.
+ */
+unsigned long resolveSocBase()
+{
+    DIR* const dir = ::opendir("/sys/class/gpio");
+    if (dir == nullptr)
+    {
+        return 0UL;
+    }
+    unsigned long bestBase  = 0UL;
+    unsigned long bestNgpio = 0UL;
+    for (dirent const* entry = ::readdir(dir); entry != nullptr; entry = ::readdir(dir))
+    {
+        unsigned int base = 0U;
+        if (::sscanf(entry->d_name, "gpiochip%u", &base) != 1)
+        {
+            continue;
+        }
+        char path[64];
+        int const len = ::snprintf(path, sizeof(path), "/sys/class/gpio/%s/ngpio", entry->d_name);
+        if ((len <= 0) || (static_cast<size_t>(len) >= sizeof(path)))
+        {
+            continue;
+        }
+        unsigned long ngpio = 0UL;
+        if (readUintFile(path, ngpio) && (ngpio > bestNgpio))
+        {
+            bestBase  = base;
+            bestNgpio = ngpio;
+        }
+    }
+    (void)::closedir(dir);
+    return bestBase;
+}
 
 /**
  * Write \p text to \p path using plain POSIX I/O.
@@ -95,10 +171,13 @@ bool buildAttrPath(char* const out, size_t const outLen, uint32_t const gpioNum,
     }
 
     // Record the pin-to-index mapping first so that set()/get() stay
-    // index-safe even if the sysfs access below fails on a non-Pi host.
+    // index-safe even if the sysfs access below fails on a non-Pi host. The
+    // caller-supplied offsets are resolved to kernel-global line numbers (base
+    // resolved once, shared by every pin), so every later access uses them.
+    unsigned long const socBase = resolveSocBase();
     for (size_t i = 0U; i < n; ++i)
     {
-        sGpioNum[i]  = pins[i].gpioNum;
+        sGpioNum[i]  = static_cast<uint32_t>(socBase + pins[i].gpioNum);
         sIsOutput[i] = pins[i].output;
     }
     sNumPins     = n;
@@ -107,14 +186,14 @@ bool buildAttrPath(char* const out, size_t const outLen, uint32_t const gpioNum,
     ::bsp::BspReturnCode result = ::bsp::BSP_OK;
     for (size_t i = 0U; i < n; ++i)
     {
-        if (!exportPin(pins[i].gpioNum))
+        if (!exportPin(sGpioNum[i]))
         {
             result = ::bsp::BSP_ERROR;
             continue;
         }
 
         char path[64];
-        if (!buildAttrPath(path, sizeof(path), pins[i].gpioNum, "direction"))
+        if (!buildAttrPath(path, sizeof(path), sGpioNum[i], "direction"))
         {
             result = ::bsp::BSP_ERROR;
             continue;
@@ -128,7 +207,7 @@ bool buildAttrPath(char* const out, size_t const outLen, uint32_t const gpioNum,
 
         if (pins[i].output)
         {
-            if (!buildAttrPath(path, sizeof(path), pins[i].gpioNum, "value"))
+            if (!buildAttrPath(path, sizeof(path), sGpioNum[i], "value"))
             {
                 result = ::bsp::BSP_ERROR;
                 continue;

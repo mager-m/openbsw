@@ -136,6 +136,12 @@ bool SysfsPwm::sInitialized                                        = false;
         {
             return ::bsp::BSP_ERROR;
         }
+        // A freshly exported channel has period 0, where the kernel rejects any
+        // duty_cycle write; a re-exported channel can retain a duty larger than
+        // the new period, where the kernel rejects the period write. Best-effort
+        // clear the duty first (a no-op on a fresh channel, whose duty is
+        // already 0), then set the period, then set the duty for real.
+        (void)writeChannelAttr(chip, channel, "duty_cycle", 0ULL);
         if (!writeChannelAttr(chip, channel, "period", periodNs))
         {
             return ::bsp::BSP_ERROR;
