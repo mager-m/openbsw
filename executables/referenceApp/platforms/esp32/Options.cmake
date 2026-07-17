@@ -27,3 +27,9 @@ set(PLATFORM_SUPPORT_STORAGE
 set(PLATFORM_SUPPORT_ROM_CHECK
     OFF
     CACHE BOOL "Turn ON ROM check support" FORCE)
+
+# TWAI (CAN) transceiver GPIOs. Defaults suit the Arduino Nano ESP32 (D2=GPIO5,
+# D3=GPIO6); override for other wiring, e.g. -DTWAI_TX_PIN=43 -DTWAI_RX_PIN=44
+# (D1/D0). Not FORCE, so a command-line -D takes precedence.
+set(TWAI_TX_PIN 5 CACHE STRING "ESP32 TWAI CAN TX GPIO")
+set(TWAI_RX_PIN 6 CACHE STRING "ESP32 TWAI CAN RX GPIO")

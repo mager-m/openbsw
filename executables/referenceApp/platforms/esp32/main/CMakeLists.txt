@@ -21,4 +21,7 @@ endif ()
 if (PLATFORM_SUPPORT_CAN)
     target_sources(main PRIVATE src/systems/CanSystem.cpp)
     target_link_libraries(main PRIVATE configuration bspTwai bspMcp2515)
+    # TWAI pins are build-configurable (see platforms/esp32/Options.cmake).
+    target_compile_definitions(
+        main PRIVATE TWAI_TX_PIN=${TWAI_TX_PIN} TWAI_RX_PIN=${TWAI_RX_PIN})
 endif ()
