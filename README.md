@@ -71,7 +71,7 @@ docker> cmake --build --preset posix
 Requires [ESP-IDF v5.5.x](https://docs.espressif.com/projects/esp-idf/en/v5.5.4/esp32s3/get-started/index.html)
 with `IDF_PATH` set and ESP-IDF tools (`cmake`, `ninja`, `xtensa-esp32s3-elf-gcc`) in PATH.
 
-The ESP32 build has two phases — OpenBSW compilation, then linking with ESP-IDF runtime:
+The ESP32 build has two phases: OpenBSW compilation, then linking with ESP-IDF runtime:
 
 ```bash
 # Phase 1: Compile OpenBSW (link failure at the end is expected)
@@ -107,9 +107,9 @@ pin configuration, and VS Code task setup.
 | Console | A console is provided for diagnostic and development purposes. | In a terminal interface | Via UART | Via USB Serial/JTAG | |
 | Commands | Commands can easily be added to the console to aid development, test and debugging. | Yes | Yes | Yes | |
 | Logging | Diagnostic logging is implemented per software component. | Yes | Yes | Yes | |
-| CAN | Support for CAN bus communication | If ``SocketCAN`` is supported | Yes | Via TWAI (ext. transceiver) | |
+| CAN | Support for CAN bus communication | If ``SocketCAN`` is supported | Yes | Build only (TWAI, needs ext. transceiver) | |
 | Sensors and actuators integration | ADC, PWM & GPIO | | Yes | Yes (ADC, LEDC, GPIO) | |
-| UDS, DoCAN | Diagnostics over CAN | If ``SocketCAN`` is supported | Yes | Yes | |
+| UDS, DoCAN | Diagnostics over CAN | If ``SocketCAN`` is supported | Yes | Build only (over CAN, needs ext. transceiver) | |
 | Ethernet | Basic TCP and UDP support | Yes | Yes | No (no PHY) | |
 | Storage | Persistent data storage on EEPROM and Flash | Yes | Yes | Yes (NVS-based) | |
 
