@@ -11,7 +11,7 @@ The ESP32 platform BSP modules provide hardware abstraction for the Arduino Nano
 - **bspUart**: UART communication via ESP-IDF UART driver
 - **bspGpio**: GPIO control via ESP-IDF GPIO driver
 - **bspAdc**: ADC reading via ESP-IDF ADC oneshot driver
-- **bspLedc**: PWM output via ESP-IDF LEDC peripheral
+- **bspLedcPwm**: PWM output via ESP-IDF LEDC peripheral
 - **bspTwai**: CAN bus communication via ESP-IDF TWAI driver
 - **bspEepromDriver**: Persistent storage via NVS (Non-Volatile Storage)
 - **bspSystemTime**: System time via ``esp_timer``

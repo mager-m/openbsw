@@ -109,13 +109,13 @@ in PATH. Update the COM port in the Flash and Monitor tasks to match your board.
 
 Available tasks:
 
-- **ESP32: Configure OpenBSW** — run once after clone
-- **ESP32: Configure IDF Project** — run once after clone
-- **ESP32: Build Only** — full compile (Phase 1 + archive + Phase 2)
-- **ESP32: 4 - Flash** — flash to board (bootloader mode required)
-- **ESP32: Monitor USB Console** — serial monitor via ``idf.py monitor``
-- **ESP32: Full Build & Flash** — build + flash in one step
-- **ESP32: Clean All** — remove build directories
+- **ESP32: Configure OpenBSW**: run once after clone
+- **ESP32: Configure IDF Project**: run once after clone
+- **ESP32: Build Only**: full compile (Phase 1 + archive + Phase 2)
+- **ESP32: 4 - Flash**: flash to board (bootloader mode required)
+- **ESP32: Monitor USB Console**: serial monitor via ``idf.py monitor``
+- **ESP32: Full Build & Flash**: build + flash in one step
+- **ESP32: Clean All**: remove build directories
 
 How It Works
 ------------
@@ -153,7 +153,7 @@ Pin Configuration
    "PWM", "5", "LEDC output (D2 header pin)"
    "CAN TX", "5", "Shared with PWM; needs external transceiver"
    "CAN RX", "6", "Needs external transceiver"
-   "RGB LED", "48", "WS2812 — not driven (needs RMT driver)"
+   "RGB LED", "48", "WS2812, not driven (needs RMT driver)"
    "ADC", "1-4", "4 channels configured"
 
 Feature Support
@@ -165,7 +165,7 @@ Feature Support
 
    "GPIO", "Yes", "22 digital pins"
    "ADC", "Yes", "4 channels configured"
-   "PWM", "Yes", "Via LEDC peripheral"
+   "PWM", "Driver present", "LEDC driver builds; not exercised by referenceApp"
    "UART", "Yes", "Console via USB Serial/JTAG"
    "CAN", "Build only", "Via TWAI; needs external transceiver"
    "Storage", "Yes", "NVS-based EEPROM emulation (4 KB)"
