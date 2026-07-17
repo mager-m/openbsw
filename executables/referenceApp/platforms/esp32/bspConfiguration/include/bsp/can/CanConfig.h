@@ -5,7 +5,8 @@
  * \ingroup bspConfiguration
  *
  * CAN (TWAI) configuration for Arduino Nano ESP32.
- * Default pins: TX=GPIO5 (D2), RX=GPIO6 (D3).
+ * Pins default to TX=GPIO5 (D2), RX=GPIO6 (D3) and are build-configurable via
+ * -DTWAI_TX_PIN / -DTWAI_RX_PIN (see platforms/esp32/Options.cmake).
  * Requires an external CAN transceiver (e.g., SN65HVD230).
  */
 #pragma once
@@ -13,13 +14,20 @@
 #include "can/Mcp2515CanTransceiver.h"
 #include "can/TwaiCanTransceiver.h"
 
+#ifndef TWAI_TX_PIN
+#define TWAI_TX_PIN 5
+#endif
+#ifndef TWAI_RX_PIN
+#define TWAI_RX_PIN 6
+#endif
+
 namespace can
 {
 
 inline TwaiCanTransceiver::TwaiConfig const defaultTwaiConfig = {
-    5,       // TX pin (D2 / GPIO5)
-    6,       // RX pin (D3 / GPIO6)
-    500000U, // 500 kbit/s
+    TWAI_TX_PIN, // TX pin (default D2 / GPIO5)
+    TWAI_RX_PIN, // RX pin (default D3 / GPIO6)
+    500000U,     // 500 kbit/s
 };
 
 // MCP2515 SPI CAN controllers. Up to three share the one SPI3 host (SCLK/MOSI/
