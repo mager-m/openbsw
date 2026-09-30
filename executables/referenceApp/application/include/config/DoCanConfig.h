@@ -70,8 +70,19 @@ constexpr uint16_t ECU_LOGICAL_ADDRESS = LOGICAL_ADDRESS;
 // functional (broadcast) request id, which every OBD-compliant ECU must also
 // receive on (and reply to physically via the response id below).
 // ===========================================================================
-constexpr uint32_t NORMAL_ADDRESSING_REQUEST_CAN_ID    = 0x7E0U;
-constexpr uint32_t NORMAL_ADDRESSING_RESPONSE_CAN_ID   = 0x7E8U;
+// The physical request/response ids can be overridden at build time (for example
+// -DDOCAN_NORMAL_ADDRESSING_REQUEST_CAN_ID=0x02AU) so an application can keep an
+// existing tester addressing. The defaults are the legislative OBD ids.
+#ifdef DOCAN_NORMAL_ADDRESSING_REQUEST_CAN_ID
+constexpr uint32_t NORMAL_ADDRESSING_REQUEST_CAN_ID = DOCAN_NORMAL_ADDRESSING_REQUEST_CAN_ID;
+#else
+constexpr uint32_t NORMAL_ADDRESSING_REQUEST_CAN_ID = 0x7E0U;
+#endif
+#ifdef DOCAN_NORMAL_ADDRESSING_RESPONSE_CAN_ID
+constexpr uint32_t NORMAL_ADDRESSING_RESPONSE_CAN_ID = DOCAN_NORMAL_ADDRESSING_RESPONSE_CAN_ID;
+#else
+constexpr uint32_t NORMAL_ADDRESSING_RESPONSE_CAN_ID = 0x7E8U;
+#endif
 constexpr uint32_t NORMAL_ADDRESSING_FUNCTIONAL_CAN_ID = 0x7DFU;
 
 // ===========================================================================
