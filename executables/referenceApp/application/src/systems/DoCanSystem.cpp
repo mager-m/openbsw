@@ -53,28 +53,41 @@ using RangeExtendedAddressingFilterType
 // adds an application-level UDS programming session (see
 // udsConfiguration/src/uds/session/DiagSession.cpp) that keeps the UDS
 // dispatcher alive instead of handing over to a bootloader.
-NormalAddressingFilterType::AddressEntryType const NORMAL_ADDRESSING_ADDRESSES[]
 #ifdef PLATFORM_SUPPORT_OBD_UDS_ADDRESSING
+NormalAddressingFilterType::AddressEntryType const NORMAL_ADDRESSING_ADDRESSES[]
     = {{0x7E0U, 0x7E8U, 0x7E8U, LOGICAL_ADDRESS, 0, 0}};
 #else
-    = {{::can::CanId::Base<config::NORMAL_ADDRESSING_FUNCTIONAL_CAN_ID>::value,
-        // ISO 15765-2 forbids multi-frame requests to a functional (broadcast) target, so this
-        // entry deliberately reports an invalid transmission address rather than the real
-        // response CAN id: DoCanReceiver rejects any multi-frame request whose transmission
-        // address is invalid, while single-frame functional requests remain unaffected, since
-        // the actual response is always addressed independently, using the real physical entry
-        // below.
-        DataLinkLayerType::INVALID_ADDRESS,
-        config::NORMAL_ADDRESSING_TESTER_ID,
-        ::transport::TransportConfiguration::FUNCTIONAL_ALL_ISO14229,
-        0,
-        0},
-       {::can::CanId::Base<config::NORMAL_ADDRESSING_REQUEST_CAN_ID>::value,
-        ::can::CanId::Base<config::NORMAL_ADDRESSING_RESPONSE_CAN_ID>::value,
-        config::NORMAL_ADDRESSING_TESTER_ID,
-        LOGICAL_ADDRESS,
-        0,
-        0}};
+// The filter requires its entries ordered ascending by CAN reception id (asserted at
+// construction). The physical request id can be overridden at build time (see
+// config/DoCanConfig.h), so the two entries are ordered by their actual values.
+NormalAddressingFilterType::AddressEntryType const NORMAL_FUNCTIONAL_ENTRY
+    = {::can::CanId::Base<config::NORMAL_ADDRESSING_FUNCTIONAL_CAN_ID>::value,
+       // ISO 15765-2 forbids multi-frame requests to a functional (broadcast) target, so this
+       // entry deliberately reports an invalid transmission address rather than the real
+       // response CAN id: DoCanReceiver rejects any multi-frame request whose transmission
+       // address is invalid, while single-frame functional requests remain unaffected, since
+       // the actual response is always addressed independently, using the real physical entry
+       // below.
+       DataLinkLayerType::INVALID_ADDRESS,
+       config::NORMAL_ADDRESSING_TESTER_ID,
+       ::transport::TransportConfiguration::FUNCTIONAL_ALL_ISO14229,
+       0,
+       0};
+
+NormalAddressingFilterType::AddressEntryType const NORMAL_PHYSICAL_ENTRY
+    = {::can::CanId::Base<config::NORMAL_ADDRESSING_REQUEST_CAN_ID>::value,
+       ::can::CanId::Base<config::NORMAL_ADDRESSING_RESPONSE_CAN_ID>::value,
+       config::NORMAL_ADDRESSING_TESTER_ID,
+       LOGICAL_ADDRESS,
+       0,
+       0};
+
+constexpr bool PHYSICAL_BELOW_FUNCTIONAL
+    = config::NORMAL_ADDRESSING_REQUEST_CAN_ID < config::NORMAL_ADDRESSING_FUNCTIONAL_CAN_ID;
+
+NormalAddressingFilterType::AddressEntryType const NORMAL_ADDRESSING_ADDRESSES[]
+    = {PHYSICAL_BELOW_FUNCTIONAL ? NORMAL_PHYSICAL_ENTRY : NORMAL_FUNCTIONAL_ENTRY,
+       PHYSICAL_BELOW_FUNCTIONAL ? NORMAL_FUNCTIONAL_ENTRY : NORMAL_PHYSICAL_ENTRY};
 #endif
 
 // mapping of each participant's raw CAN identifier to its own transport address, as needed by
