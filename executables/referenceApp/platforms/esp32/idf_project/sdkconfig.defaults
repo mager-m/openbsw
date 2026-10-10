@@ -22,7 +22,7 @@ CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
 # Watchdog
 CONFIG_ESP_TASK_WDT_TIMEOUT_S=10
 
-# Panic handler — print backtrace over UART then reboot
+# Panic handler - print backtrace over UART then reboot
 CONFIG_ESP_SYSTEM_PANIC_PRINT_REBOOT=y
 
 # Verbose logging for debugging

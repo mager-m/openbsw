@@ -23,7 +23,7 @@ target_include_directories(freeRtosEsp32Port INTERFACE "${_FREERTOS_INC}")
 add_library(freeRtosEsp32 INTERFACE)
 target_link_libraries(freeRtosEsp32 INTERFACE bspInterrupts)
 
-# --- freeRtos (INTERFACE replacement — no source compilation) ---
+# --- freeRtos (INTERFACE replacement - no source compilation) ---
 # Uses ESP-IDF's FreeRTOS headers. The actual kernel is linked via the
 # ESP-IDF wrapper project at link time.
 add_library(freeRtos INTERFACE)

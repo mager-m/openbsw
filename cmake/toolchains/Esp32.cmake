@@ -30,7 +30,7 @@ if (NOT DEFINED IDF_PATH)
             "IDF_PATH must be set. Install ESP-IDF and source export.sh")
 endif ()
 
-# ESP-IDF component include paths — needed for driver headers (gpio, uart,
+# ESP-IDF component include paths - needed for driver headers (gpio, uart,
 # timer, etc.) and their transitive dependencies (esp_err.h, soc types, …).
 set(_IDF_COMP "${IDF_PATH}/components")
 set(ESP_IDF_INCLUDE_DIRS
