@@ -8,7 +8,7 @@ target_link_libraries(
             bspConfiguration etl freeRtos
     PUBLIC bspEepromDriver)
 
-# main.cpp contains app_main() which calls app::run() — needs application headers
+# main.cpp contains app_main() which calls app::run() - needs application headers
 target_include_directories(
     main
     PRIVATE "${CMAKE_SOURCE_DIR}/executables/referenceApp/application/include")

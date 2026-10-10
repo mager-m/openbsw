@@ -9,7 +9,7 @@ static const char *TAG = "openbsw";
 
 extern void asyncInitialized(void);
 
-/* OpenBSW's idle hook — runs console + logger processing.
+/* OpenBSW's idle hook - runs console + logger processing.
  * Normally called by FreeRTOS idle task via vApplicationIdleHook,
  * but we localized that symbol. Call it from our idle loop instead. */
 extern void vApplicationIdleHook(void);
@@ -24,22 +24,22 @@ static int s_scheduler_started = 0;
  * vTaskStartScheduler wrapper.
  *
  * Called TWICE:
- * 1. By ESP-IDF during system boot (esp_startup_start_app) — pass through
- * 2. By OpenBSW's FreeRtosAdapter::run() — skip, call asyncInitialized
+ * 1. By ESP-IDF during system boot (esp_startup_start_app) - pass through
+ * 2. By OpenBSW's FreeRtosAdapter::run() - skip, call asyncInitialized
  */
 void __wrap_vTaskStartScheduler(void)
 {
     if (!s_scheduler_started)
     {
-        /* First call — ESP-IDF boot. Start the real scheduler. */
+        /* First call - ESP-IDF boot. Start the real scheduler. */
         s_scheduler_started = 1;
         __real_vTaskStartScheduler();
-        /* Never reaches here — scheduler takes over */
+        /* Never reaches here - scheduler takes over */
     }
     else
     {
-        /* Second call — from OpenBSW. Scheduler already running. */
-        ESP_LOGI(TAG, "Scheduler already running — calling asyncInitialized()");
+        /* Second call - from OpenBSW. Scheduler already running. */
+        ESP_LOGI(TAG, "Scheduler already running - calling asyncInitialized()");
         asyncInitialized();
 
         ESP_LOGI(TAG, "OpenBSW started. Running idle handler.");
@@ -64,7 +64,7 @@ TaskHandle_t __wrap_xTaskGetIdleTaskHandle(void)
 }
 
 /*
- * xTaskCreateStaticPinnedToCore wrapper — use dynamic allocation.
+ * xTaskCreateStaticPinnedToCore wrapper - use dynamic allocation.
  *
  * OpenBSW's Task<> template allocates stack as a static array in .bss,
  * but ESP-IDF's xPortcheckValidStackMem() rejects this memory region.

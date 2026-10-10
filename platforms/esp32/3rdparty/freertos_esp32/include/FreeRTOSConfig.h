@@ -12,7 +12,7 @@
 
 #include "esp_idf_freertos/FreeRTOSConfig_idf.h"
 
-/* Trace macro stubs — ESP-IDF's portmacro.h references these */
+/* Trace macro stubs - ESP-IDF's portmacro.h references these */
 #ifndef traceISR_EXIT_TO_SCHEDULER
 #define traceISR_EXIT_TO_SCHEDULER()
 #endif

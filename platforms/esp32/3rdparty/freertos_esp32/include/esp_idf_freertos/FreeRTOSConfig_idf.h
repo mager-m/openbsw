@@ -10,7 +10,7 @@
 /* Prevent ESP-IDF's FreeRTOSConfig.h from being skipped by our #pragma once */
 #include "sdkconfig.h"
 
-/* ESP-IDF's FreeRTOS configuration — sets correct struct sizes for
+/* ESP-IDF's FreeRTOS configuration - sets correct struct sizes for
  * dual-core ESP32-S3, TLS support, etc.
  *
  * We include by the config/xtensa path which has arch-specific settings.
@@ -22,7 +22,7 @@
  * We use a relative path from the IDF component directory. The IDF_PATH
  * is set at compile time via -I flags. */
 
-/* Core FreeRTOS config defines from ESP-IDF — extracted values.
+/* Core FreeRTOS config defines from ESP-IDF - extracted values.
  * These MUST match what ESP-IDF uses to size its internal structures. */
 
 /* Number of cores (ESP32-S3 is dual-core) */
@@ -44,11 +44,11 @@
 /* Task notification array */
 #define configTASK_NOTIFICATION_ARRAY_ENTRIES CONFIG_FREERTOS_TASK_NOTIFICATION_ARRAY_ENTRIES
 
-/* TLS / C runtime support — must match ESP-IDF for correct StaticTask_t size */
+/* TLS / C runtime support - must match ESP-IDF for correct StaticTask_t size */
 #define configUSE_C_RUNTIME_TLS_SUPPORT 1
 #define configTLS_BLOCK_TYPE            void*
 
-/* TLS block operations — stubs (OpenBSW uses dynamic task creation) */
+/* TLS block operations - stubs (OpenBSW uses dynamic task creation) */
 #define configINIT_TLS_BLOCK(xTLSBlock, ...)  (void)(xTLSBlock)
 #define configSET_TLS_BLOCK(xTLSBlock)        (void)(xTLSBlock)
 #define configDEINIT_TLS_BLOCK(xTLSBlock)     (void)(xTLSBlock)
@@ -117,7 +117,7 @@
 #define INCLUDE_uxTaskPriorityGet     1
 #define INCLUDE_xTimerPendFunctionCall 1
 
-/* Critical nesting — Xtensa ESP32 uses portMUX, not nesting counter */
+/* Critical nesting - Xtensa ESP32 uses portMUX, not nesting counter */
 #define portCRITICAL_NESTING_IN_TCB 0
 
 /* MPU */

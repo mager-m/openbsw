@@ -1,9 +1,9 @@
-# 3rdparty modules Configure — must come first (creates freeRtos target)
+# 3rdparty modules Configure - must come first (creates freeRtos target)
 if (BUILD_TARGET_RTOS STREQUAL "FREERTOS")
     add_subdirectory(3rdparty/freertos_esp32)
 endif ()
 
-# ESP-IDF component headers — INTERFACE library providing include paths
+# ESP-IDF component headers - INTERFACE library providing include paths
 # for ESP-IDF driver and system headers used by the ESP32 BSP.
 add_library(espIdfHeaders INTERFACE)
 

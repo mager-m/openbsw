@@ -1,4 +1,4 @@
-# Main ESP-IDF component — links pre-built OpenBSW libraries.
+# Main ESP-IDF component - links pre-built OpenBSW libraries.
 #
 # A stub source file is required by idf_component_register.
 # The actual app_main() is in the OpenBSW libmain.a library.
@@ -24,7 +24,7 @@ set(_STRIP_LIBS
 set(_STRIP_SYMBOLS
     vApplicationGetIdleTaskMemory
     vApplicationGetTimerTaskMemory
-    # NOTE: vApplicationIdleHook is NOT localized — we call it from our idle loop
+    # NOTE: vApplicationIdleHook is NOT localized - we call it from our idle loop
     vApplicationStackOverflowHook
     vApplicationMallocFailedHook
 )
